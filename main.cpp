@@ -24,52 +24,27 @@ void init()
 void drawSky001(){
     glColor3f(0.294f, 0.722f, 0.961f);
     glBegin(GL_POLYGON); // Obj-001(Sky Background)
-    glVertex2f(0 , 0);
-    glVertex2f(1280 , 0);
-    glVertex2f(1280 , 720);
-    glVertex2f(0 , 720);
+    glVertex2f(0 , 0); glVertex2f(1280 , 0); glVertex2f(1280 , 720);glVertex2f(0 , 720);
     glEnd();
 }
 
 void drawClouds002(){
     glColor3f(0.902f, 0.957f, 0.988f);
     glBegin(GL_POLYGON); //Obj-002(Cloud 1)
-    glVertex2f(75.01 , 547.6);
-    glVertex2f(195.01 , 547.6);
-    glVertex2f(195.01 , 567.6);
-    glVertex2f(175.01 , 567.6);
-    glVertex2f(175.01 , 587.6);
-    glVertex2f(115.01 , 587.6);
-    glVertex2f(115.01 , 567.06);
-    glVertex2f(75.01 , 567.06);
+    glVertex2f(75.01 , 547.6); glVertex2f(195.01 , 547.6); glVertex2f(195.01 , 567.6); glVertex2f(175.01 , 567.6);glVertex2f(175.01 , 587.6);
+    glVertex2f(115.01 , 587.6); glVertex2f(115.01 , 567.06);glVertex2f(75.01 , 567.06);
     glEnd();
 
     glColor3f(0.902f, 0.957f, 0.988f);
     glBegin(GL_POLYGON); //Obj-003(Cloud 2)
-    glVertex2f(560, 600);
-    glVertex2f(760, 600);
-    glVertex2f(760, 620);
-    glVertex2f(740, 620);
-    glVertex2f(740, 640);
-    glVertex2f(660, 640);
-    glVertex2f(660, 660);
-    glVertex2f(600, 660);
-    glVertex2f(600, 640);
-    glVertex2f(560, 640);
+    glVertex2f(560, 600); glVertex2f(760, 600); glVertex2f(760, 620); glVertex2f(740, 620); glVertex2f(740, 640); glVertex2f(660, 640);
+    glVertex2f(660, 660); glVertex2f(600, 660); glVertex2f(600, 640);glVertex2f(560, 640);
      glEnd();
 
      glColor3f(0.902f, 0.957f, 0.988f);
     glBegin(GL_POLYGON); //Obj-004(Cloud 3)
-    glVertex2f(1049.99f, 558.81f);
-    glVertex2f(1189.99f, 558.81f);
-    glVertex2f(1189.99f, 578.81f);
-    glVertex2f(1169.99f, 598.81f);
-    glVertex2f(1149.99f, 598.81f);
-    glVertex2f(1149.99f, 618.81f);
-    glVertex2f(1089.99f, 618.81f);
-    glVertex2f(1089.99f, 598.81f);
-    glVertex2f(1069.99f, 598.81f);
-    glVertex2f(1069.99f, 578.81f);
+    glVertex2f(1049.99f, 558.81f); glVertex2f(1189.99f, 558.81f); glVertex2f(1189.99f, 578.81f); glVertex2f(1169.99f, 598.81f); glVertex2f(1149.99f, 598.81f);
+    glVertex2f(1149.99f, 618.81f); glVertex2f(1089.99f, 618.81f); glVertex2f(1089.99f, 598.81f); glVertex2f(1069.99f, 598.81f); glVertex2f(1069.99f, 578.81f);
     glVertex2f(1049.99f, 578.81f);
     glEnd();
 }
@@ -77,64 +52,33 @@ void drawClouds002(){
 void drawBush003(){
     glColor3f(0.388f, 0.741f, 0.188f);
     glBegin(GL_POLYGON); //Obj-005(Left Bush)
-    glVertex2f(0, 280);
-    glVertex2f(240, 280);
-    glVertex2f(240,420);
-    glVertex2f(216.46, 430.49);
-    glVertex2f(205.53, 462.6);
-    glVertex2f(175.47,462.26);
-    glVertex2f(140.97, 434.58);
-    glVertex2f(116.71, 461.23);
-    glVertex2f(93.49, 454.74);
-    glVertex2f(74.01, 449.39);
-    glVertex2f(20, 460);
-    glVertex2f(2.62,438.34);
-    glVertex2f(0,424.34);
+    glVertex2f(0, 280); glVertex2f(240, 280); glVertex2f(240,420); glVertex2f(216.46, 430.49); glVertex2f(205.53, 462.6);
+    glVertex2f(175.47,462.26); glVertex2f(140.97, 434.58); glVertex2f(116.71, 461.23); glVertex2f(93.49, 454.74); glVertex2f(74.01, 449.39);
+    glVertex2f(20, 460);glVertex2f(2.62,438.34);glVertex2f(0,424.34);
     glEnd();
 
     glColor3f(0.388f, 0.741f, 0.188f);
     glBegin(GL_POLYGON); //Obj-006(Right Bush)
-    glVertex2f(1100, 280);
-    glVertex2f(1280, 280);
-    glVertex2f(1280, 440);
-    glVertex2f(1260, 460);
-    glVertex2f(1268.97, 482.75);
-    glVertex2f(1229.68, 489.58);
-    glVertex2f(1208.84, 462.6);
-    glVertex2f(1179.81, 484.12);
-    glVertex2f(1164.78, 469.77);
-    glVertex2f(1129.65, 469);
-    glVertex2f(1100.07, 461.14);
+    glVertex2f(1100, 280); glVertex2f(1280, 280); glVertex2f(1280, 440); glVertex2f(1260, 460); glVertex2f(1268.97, 482.75); glVertex2f(1229.68, 489.58);
+    glVertex2f(1208.84, 462.6); glVertex2f(1179.81, 484.12); glVertex2f(1164.78, 469.77); glVertex2f(1129.65, 469); glVertex2f(1100.07, 461.14);
     glEnd();
 }
 
 void drawPilllar004(){
     glColor3f(0.996f, 0.831f, 0.220f);
     glBegin(GL_POLYGON); //Obj-007 (Left Pillar)
-    glVertex2f(0, 360);
-    glVertex2f(240,380);
-    glVertex2f(240,400);
-    glVertex2f(0, 380);
+    glVertex2f(0, 360); glVertex2f(240,380); glVertex2f(240,400); glVertex2f(0, 380);
     glEnd();
 
     glColor3f(0.984f, 0.941f, 0.875f);
     glBegin(GL_POLYGON);
-    glVertex2f(106.06, 280.06);
-    glVertex2f(120, 280);
-    glVertex2f(120, 370);
-    glVertex2f(105.94, 368.83);
+    glVertex2f(106.06, 280.06); glVertex2f(120, 280); glVertex2f(120, 370);  glVertex2f(105.94, 368.83);
     glEnd();
     glBegin(GL_POLYGON);
-    glVertex2f(140, 280);
-    glVertex2f(154 , 280);
-    glVertex2f(154.36, 372.86);
-    glVertex2f(140.15, 371.68);
+    glVertex2f(140, 280); glVertex2f(154 , 280); glVertex2f(154.36, 372.86); glVertex2f(140.15, 371.68);
     glEnd();
     glBegin(GL_POLYGON);
-    glVertex2f(180, 280);
-    glVertex2f(196.52, 280);
-    glVertex2f(196.09, 376.34);
-    glVertex2f(180.26, 375.02);
+    glVertex2f(180, 280); glVertex2f(196.52, 280);glVertex2f(196.09, 376.34);glVertex2f(180.26, 375.02);
     glEnd();
 }
 
@@ -188,34 +132,13 @@ void drawCastle005(){
 
      glColor3f(0.988f, 0.745f, 0.275f);
      glBegin(GL_POLYGON); //Obj-010 (right castle wall)
-     glVertex2f(960, 280);
-     glVertex2f(1100, 280);
-     glVertex2f(1100.07, 461.14);
-     glVertex2f(1070,  461);
-     glVertex2f(1070, 471);
-     glVertex2f(1080, 471);
-     glVertex2f(1080, 481);
-     glVertex2f(1060, 481);
-     glVertex2f(1060, 471);
-     glVertex2f(1050, 471);
-     glVertex2f(1050, 481);
-     glVertex2f(1040, 481);
-     glVertex2f(1040, 471);
-     glVertex2f(1030, 471);
-     glVertex2f(1030, 481);
-     glVertex2f(1020, 481);
-     glVertex2f(1020, 471);
-     glVertex2f(1010, 471);
-     glVertex2f(1010, 481);
-     glVertex2f(1000, 481);
-     glVertex2f(1000, 471);
-     glVertex2f(990, 471);
-     glVertex2f(990, 481);
-     glVertex2f(970, 481);
-     glVertex2f(970, 471);
-     glVertex2f(980, 471);
-     glVertex2f(980, 461);
-    glVertex2f(960.07, 461.74);
+     glVertex2f(960, 280); glVertex2f(1100, 280); glVertex2f(1100.07, 461.14); glVertex2f(1070,  461);
+     glVertex2f(1070, 471); glVertex2f(1080, 471); glVertex2f(1080, 481); glVertex2f(1060, 481);
+     glVertex2f(1060, 471);glVertex2f(1050, 471);glVertex2f(1050, 481);glVertex2f(1040, 481);glVertex2f(1040, 471);
+     glVertex2f(1030, 471);glVertex2f(1030, 481);glVertex2f(1020, 481);glVertex2f(1020, 471);
+     glVertex2f(1010, 471);glVertex2f(1010, 481);glVertex2f(1000, 481);glVertex2f(1000, 471);
+     glVertex2f(990, 471);glVertex2f(990, 481);glVertex2f(970, 481);glVertex2f(970, 471);
+     glVertex2f(980, 471);glVertex2f(980, 461);glVertex2f(960.07, 461.74);
 glEnd();
 
     glColor3f(0.035f, 0.380f, 0.761f);
@@ -620,7 +543,7 @@ void drawTicketCounter010(){
 
  void drawPersons011(){
     glColor3f(0.13f, 0.22f, 0.43f);
-    glBegin(GL_POLYGON); //Obj-29 (Child on left)
+    glBegin(GL_POLYGON); //Obj-29 (Child 1)
     glVertex2f(82,74); glVertex2f(83,77); glVertex2f(84,77); glVertex2f(84,81); glVertex2f(81,81); glVertex2f(80,75);//foot
     glEnd();
     glBegin(GL_POLYGON);
@@ -666,7 +589,7 @@ void drawTicketCounter010(){
     glEnd();
 
     glColor3f(0.16f, 0.21f, 0.41f);
-    glBegin(GL_POLYGON); //Obj-30 (Person with child)
+    glBegin(GL_POLYGON); //Obj-30 (Person 1)
     glVertex2f(121,100); glVertex2f(118,91);
     glVertex2f(112,78); glVertex2f(120,75); glVertex2f(121,76); glVertex2f(119,79); glVertex2f(126,93); glVertex2f(131,100);//leg
     glEnd();
@@ -700,7 +623,7 @@ void drawTicketCounter010(){
     glEnd();
 
     glColor3f(0.67f, 0.18f, 0.41f);
-    glBegin(GL_POLYGON); //Obj-31 (Lady on the right)
+    glBegin(GL_POLYGON); //Obj-31 (Lady 1)
     glVertex2f(864,43); glVertex2f(858,40); glVertex2f(856,43); glVertex2f(860,45); glVertex2f(863,45);
     glEnd();
     glBegin(GL_POLYGON);
@@ -740,7 +663,7 @@ void drawTicketCounter010(){
     glEnd();
 
     glColor3f(0.16f, 0.21f, 0.41f);
-    glBegin(GL_POLYGON); //Obj-32 (top left person)
+    glBegin(GL_POLYGON); //Obj-32 (person 2)
     glVertex2f(46,238); glVertex2f(43,229);
     glVertex2f(37,216); glVertex2f(45,213); glVertex2f(46,214); glVertex2f(44,217); glVertex2f(51,231); glVertex2f(56,238);//leg
     glEnd();
@@ -775,7 +698,7 @@ void drawTicketCounter010(){
 
 
     glColor3f(0.13f, 0.22f, 0.43f);
-    glBegin(GL_POLYGON); //Obj-29 (Child on right)
+    glBegin(GL_POLYGON); //Obj-33 (Child 2)
     glVertex2f(1082,224); glVertex2f(1083,227); glVertex2f(1084,227); glVertex2f(1084,231); glVertex2f(1081,231); glVertex2f(1080,225);//foot
     glEnd();
     glBegin(GL_POLYGON);
@@ -816,12 +739,12 @@ void drawTicketCounter010(){
 
     glColor3f(0.15f, 0.18f, 0.29f);
     glBegin(GL_POLYGON);
-    glVertex2f(1107,259); glVertex2f(1105,260); glVertex2f(1099,253);
+    glVertex2f(1107,259); glVertex2f(1105,260); glVertex2f(1099,253);//hair
     glVertex2f(1097,254); glVertex2f(1097,259); glVertex2f(1107,263); glVertex2f(1108,262);
     glEnd();
 
     glColor3f(0.16f, 0.21f, 0.41f);
-glBegin(GL_POLYGON); //Obj-32 (middle person)
+glBegin(GL_POLYGON); //Obj-34 (person 3)
 glVertex2f(546,208); glVertex2f(543,199);
 glVertex2f(537,186); glVertex2f(545,183); glVertex2f(546,184); glVertex2f(544,187); glVertex2f(551,201); glVertex2f(556,208);//leg
 glEnd();
@@ -855,7 +778,7 @@ glVertex2f(546,230); glVertex2f(546,235); glVertex2f(549,237); glVertex2f(556,23
 glEnd();
 
 glColor3f(0.13f, 0.22f, 0.43f);
-glBegin(GL_POLYGON); //Obj-29 (Child on left)
+glBegin(GL_POLYGON); //Obj-35 (Child 3)
 glVertex2f(782,174); glVertex2f(783,177); glVertex2f(784,177); glVertex2f(784,181); glVertex2f(781,181); glVertex2f(780,175);//foot
 glEnd();
 glBegin(GL_POLYGON);
@@ -901,7 +824,7 @@ glVertex2f(797,204); glVertex2f(797,209); glVertex2f(807,213); glVertex2f(808,21
 glEnd();
 
 glColor3f(0.16f, 0.21f, 0.41f);
-glBegin(GL_POLYGON); //Obj-30 (Person with child)
+glBegin(GL_POLYGON); //Obj-36 (Person 4)
 glVertex2f(821,200); glVertex2f(818,191);
 glVertex2f(812,178); glVertex2f(820,175); glVertex2f(821,176); glVertex2f(819,179); glVertex2f(826,193); glVertex2f(831,200);//leg
 glEnd();
@@ -935,7 +858,7 @@ glVertex2f(821,222); glVertex2f(821,227); glVertex2f(824,229); glVertex2f(831,23
 glEnd();
 
 glColor3f(0.67f, 0.18f, 0.41f);
-glBegin(GL_POLYGON); //Obj-31 (Lady on the right)
+glBegin(GL_POLYGON); //Obj-37 (Lady 2)
 glVertex2f(364,93); glVertex2f(358,90); glVertex2f(356,93); glVertex2f(360,95); glVertex2f(363,95);
 glEnd();
 glBegin(GL_POLYGON);
@@ -977,7 +900,7 @@ glEnd();
 
  void drawPersonsMirrored012(){
     glColor3f(0.67f, 0.18f, 0.41f);
-    glBegin(GL_POLYGON); //Obj-33 (Lady in middle)
+    glBegin(GL_POLYGON); //Obj-38 (Lady 3)
     glVertex2f(366,153); glVertex2f(372,150); glVertex2f(374,153); glVertex2f(370,155); glVertex2f(367,155);
     glEnd();
     glBegin(GL_POLYGON);
@@ -1017,7 +940,7 @@ glEnd();
     glEnd();
 
     glColor3f(0.16f, 0.21f, 0.41f);
-    glBegin(GL_POLYGON); // person
+    glBegin(GL_POLYGON); // Obj-39 (person 5)
         glVertex2f(667,50);glVertex2f(670,41);glVertex2f(676,28);glVertex2f(668,25);glVertex2f(667,26); //leg
         glVertex2f(669,29);glVertex2f(662,43);glVertex2f(657,50);
     glEnd();
@@ -1050,7 +973,7 @@ glEnd();
     glEnd();
 
     glColor3f(0.13f, 0.22f, 0.43f);
-glBegin(GL_POLYGON); //Obj-29 (Child on left) - mirrored & shifted
+glBegin(GL_POLYGON); //Obj-40 (Child 4)
 glVertex2f(1142,34); glVertex2f(1141,37); glVertex2f(1140,37); glVertex2f(1140,41); glVertex2f(1143,41); glVertex2f(1144,35);//foot
 glEnd();
 glBegin(GL_POLYGON);
@@ -1096,7 +1019,7 @@ glVertex2f(1127,64); glVertex2f(1127,69); glVertex2f(1117,73); glVertex2f(1116,7
 glEnd();
 
 glColor3f(0.16f, 0.21f, 0.41f);
-glBegin(GL_POLYGON); //Obj-30 (Person with child)
+glBegin(GL_POLYGON); //Obj-41 (Person 6)
 glVertex2f(1103,60); glVertex2f(1106,51);
 glVertex2f(1112,38); glVertex2f(1104,35); glVertex2f(1103,36); glVertex2f(1105,39); glVertex2f(1098,53); glVertex2f(1093,60);//leg
 glEnd();
@@ -1129,7 +1052,7 @@ glVertex2f(1092,86); glVertex2f(1098,85); glVertex2f(1100,80);//hair
 glVertex2f(1103,82); glVertex2f(1103,87); glVertex2f(1100,89); glVertex2f(1093,91);
 glEnd();
 glColor3f(0.67f, 0.18f, 0.41f);
-glBegin(GL_POLYGON); //Obj-33 (Lady in middle)
+glBegin(GL_POLYGON); //Obj-42 (Lady 4)
 glVertex2f(866,223); glVertex2f(872,220); glVertex2f(874,223); glVertex2f(870,225); glVertex2f(867,225);
 glEnd();
 glBegin(GL_POLYGON);
@@ -1169,7 +1092,7 @@ glVertex2f(880,273); glVertex2f(884,273); glVertex2f(892,257); glVertex2f(887,25
 glEnd();
 
 glColor3f(0.16f, 0.21f, 0.41f);
-glBegin(GL_POLYGON); // person
+glBegin(GL_POLYGON); //Obj-43 (Person 7)
     glVertex2f(117,50);glVertex2f(120,41);glVertex2f(126,28);glVertex2f(118,25);glVertex2f(117,26); //leg
     glVertex2f(119,29);glVertex2f(112,43);glVertex2f(107,50);
 glEnd();
@@ -1204,6 +1127,7 @@ glEnd();
 
 void displayScene1(){
     glClear(GL_COLOR_BUFFER_BIT);
+    glLineWidth(1.0f);
     drawSky001();
     //drawClouds002();
 
@@ -4929,6 +4853,8 @@ const int WIN_W = 1280;
  int currentScene =1 ;
 void handleKeypress(unsigned char key, int x, int y)
 {
+    // ================= SCENE SWITCHING =================
+
     if (key == '1') {
         currentScene = 1;
         glutDisplayFunc(displayScene1);
@@ -4950,18 +4876,25 @@ void handleKeypress(unsigned char key, int x, int y)
         glutDisplayFunc(displayScene5);
         glutReshapeFunc(reshapeScene5);
     }
-    else if (key == 'a' || key == 'A') {
+    else if (key == 'a') {
         currentScene--;
-        if (currentScene < 1) currentScene = 5;
-        handleKeypress((unsigned char)('0' + currentScene), x, y);
-        return; // avoid double glutPostRedisplay below
-    }
-    else if (key == 'd' || key == 'D') {
-        currentScene++;
-        if (currentScene > 5) currentScene = 1;
+
+        if (currentScene < 1)
+            currentScene = 5;
+
         handleKeypress((unsigned char)('0' + currentScene), x, y);
         return;
     }
+    else if (key == 'd') {
+        currentScene++;
+
+        if (currentScene > 5)
+            currentScene = 1;
+
+        handleKeypress((unsigned char)('0' + currentScene), x, y);
+        return;
+    }
+
     // ================= SCENE 5 CONTROLS =================
 
     if (currentScene == 5)
@@ -4984,6 +4917,7 @@ void handleKeypress(unsigned char key, int x, int y)
             return;
         }
 
+        // J = move down
         if (key == 'j' || key == 'J')
         {
             carY -= CAR_STEP;
@@ -4994,9 +4928,9 @@ void handleKeypress(unsigned char key, int x, int y)
             glutPostRedisplay();
             return;
         }
-    //=================================
+    }
+
     glutPostRedisplay();
-}
 }
 
 int main(int argc, char** argv)
@@ -5011,12 +4945,21 @@ int main(int argc, char** argv)
     glutDisplayFunc(displayScene1);
     glutKeyboardFunc(handleKeypress);
     glutMouseFunc(mouse);
+<<<<<<< HEAD
     glutTimerFunc(60, timer, 0);
     glutTimerFunc(16, timerScene2, 0);
     glutTimerFunc(16, update, 0);
     glutTimerFunc(16, updateClouds, 0);
     glutTimerFunc(16, updateScene4, 0);
     glutTimerFunc(TIMER_MS, timerScene5, 0);
+=======
+    glutTimerFunc(60, timer, 0); //SAIF
+    glutTimerFunc(16, update, 0);//RAHAT
+    glutTimerFunc(16, updateClouds, 0);//RAHAT
+    glutTimerFunc(16, timerScene2, 0);//SAFID
+    glutTimerFunc(16, updateScene4, 0);//BADHON
+    glutTimerFunc(TIMER_MS, timerScene5, 0);//RAKA
+>>>>>>> 4a8bb1fcbf88e397e47a86c5b1e54585dedfdd47
     glutMainLoop();
     return 0;
 }

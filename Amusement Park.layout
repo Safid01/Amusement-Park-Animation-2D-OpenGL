@@ -4,7 +4,11 @@
 	<ActiveTarget name="Debug" />
 	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
+<<<<<<< HEAD
 			<Cursor1 position="63301" topLine="1782" />
+=======
+			<Cursor1 position="45473" topLine="4833" />
+>>>>>>> 4a8bb1fcbf88e397e47a86c5b1e54585dedfdd47
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

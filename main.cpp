@@ -1718,15 +1718,16 @@ void displayScene3(){
 #define PI 3.14159265
 
 // GLOBAL STATE & ANIMATION VARIABLES
-// ============================================================================
+// ==================================
 
-// [A-101]: Pirate Ship Pendulum Motion Variables[cite: 9]
+// [A-101]: Pirate Ship Pendulum Motion Variables
 float swingAngle = 0.0f;
+float swingDir = 1.0f;
 float maxSwingAngle = 55.0f;
 float swingSpeed = 1.6f;
 float timeStep = 0.0f;
 
-// [A-102]: Ferris Wheel Rotation Variable[cite: 9]
+// [A-102]: Ferris Wheel Rotation Variable
 float ferrisWheelAngle = 0.0f;
 
 // [A-103]: Day/Night Cycle Parameters (12.0s Total: 6.0s Day, 6.0s Night)
@@ -1738,16 +1739,19 @@ float nightFactor = 0.0f;
 float sunX = 640.0f, sunY = -100.0f;
 float moonX = 640.0f, moonY = -100.0f;
 
-// System Controls (Starts paused at theta = 0)
-bool isPaused = true;
+// System Controls
+bool isPaused = TRUE;
 
 // Starfield Pool
-const int numStars = 65;
-float starX[numStars];
-float starY[numStars];
+float stars[][2] = {
+    {100, 600}, {250, 650}, {400, 580}, {550, 620},
+    {700, 660}, {850, 590}, {1000, 640}, {1150, 610},
+    {180, 520}, {320, 540}, {620, 510}, {920, 530}
+};
+const int numStars = 12;
 
 // DATA STRUCTURES FOR ENTITIES
-// ============================================================================
+// ============================
 
 struct Point { float x, y; };
 struct Cloud { float x, y, scale, speed; };
@@ -1787,53 +1791,14 @@ Human humans[] = {
 };
 const int numHumans = 12;
 
-// ============================================================================
 // MATHEMATICAL CORE FUNCTIONS (SYLLABUS IMPLEMENTATIONS)
-// ============================================================================
+// ======================================================
 
-// Linear Interpolation: Lerp(a, b, t) = a + (b - a) * t
+// Linear Interpolation
 float lerp(float a, float b, float t) {
     return a + (b - a) * t;
 }
 
-// [Syllabus Ch 8: Point Clipping Algorithm][cite: 5]
-// Checks if coordinates are inside the bounding box xwmin < x < xwmax and ywmin < y < ywmax
-bool pointClipping(float x, float y, float xwmin, float xwmax, float ywmin, float ywmax) {
-    return (x >= xwmin && x <= xwmax && y >= ywmin && y <= ywmax);
-}
-
-// [Obj-124: Syllabus Midterm - DDA Line Algorithm][cite: 10]
-// Scan-converts a line using standard differential steps
-void drawLineDDA_obj124(float x1, float y1, float x2, float y2) {
-    float dx = x2 - x1;
-    float dy = y2 - y1;
-    float steps = (std::abs(dx) > std::abs(dy)) ? std::abs(dx) : std::abs(dy);
-    float xInc = dx / steps;
-    float yInc = dy / steps;
-    float x = x1, y = y1;
-
-    glPointSize(1.5f);
-    glBegin(GL_POINTS);
-    for (int i = 0; i <= (int)steps; i++) {
-        glVertex2f(x, y);
-        x += xInc;
-        y += yInc;
-    }
-    glEnd();
-}
-
-// [Syllabus Ch 3: 2D Shearing Homogeneous Matrix][cite: 8]
-void applyShearX_obj124(float shx) {
-    GLfloat m[16] = {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        shx,  1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-    glMultMatrixf(m);
-}
-
-// [Syllabus Ch 5: Quadratic Bézier Polynomial][cite: 6]
 // B(t) = (1-t)^2 * P0 + 2*(1-t)*t * P1 + t^2 * P2
 Point getBezierPoint(Point p0, Point p1, Point p2, float t) {
     float u = 1.0f - t;
@@ -1843,34 +1808,28 @@ Point getBezierPoint(Point p0, Point p1, Point p2, float t) {
     return p;
 }
 
-// Helper: Circle Drawing using GL_TRIANGLE_FAN
-void drawCircle(float cx, float cy, float r, int segments, float red, float green, float blue, float alpha = 1.0f) {
-    glColor4f(red, green, blue, alpha);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(cx, cy);
-    for (int i = 0; i <= segments; ++i) {
-        float angle = 2.0f * (float)M_PI * (float)i / (float)segments;
-        glVertex2f(cx + r * cosf(angle), cy + r * sinf(angle));
+// Solid Filled Circle
+void drawCircle(float cx, float cy, float r) {
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 30; i++) {
+        float theta = i * (2.0f * PI / 30.0f);
+        glVertex2f(cx + r * cosf(theta), cy + r * sinf(theta));
     }
     glEnd();
 }
 
-// Helper: Circle Outline using GL_LINE_LOOP
-void drawCircleOutline(float cx, float cy, float r, int segments, float lineWidth, float red, float green, float blue) {
-    glLineWidth(lineWidth);
-    glColor3f(red, green, blue);
+// Hollow Circle Outline
+void drawCircleOutline(float cx, float cy, float r) {
     glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < segments; ++i) {
-        float angle = 2.0f * (float)M_PI * (float)i / (float)segments;
-        glVertex2f(cx + r * cosf(angle), cy + r * sinf(angle));
+    for (int i = 0; i < 30; i++) {
+        float theta = i * (2.0f * PI / 30.0f);
+        glVertex2f(cx + r * cosf(theta), cy + r * sinf(theta));
     }
     glEnd();
-    glLineWidth(1.0f);
 }
 
-// ============================================================================
 // OBJECT DRAWING FUNCTIONS (WITH NEW SUFFIX SCHEME)
-// ============================================================================
+// =================================================
 
 // [Obj-101]: Sky Gradient
 void drawSky_obj101() {
@@ -1891,13 +1850,12 @@ void drawSky_obj101() {
     glEnd();
 }
 
-// [Obj-102]: Starfield (Using Chapter 8 Point Clipping)[cite: 5]
+// [Obj-102]: Starfield (Fixed coordinates)
 void drawStars_obj102() {
     if (nightFactor > 0.05f) {
+        glColor4f(1.0f, 1.0f, 1.0f, nightFactor);
         for (int i = 0; i < numStars; ++i) {
-            if (pointClipping(starX[i], starY[i], -1000.0f, 2000.0f, 300.0f, 1000.0f)) {
-                drawCircle(starX[i], starY[i], 1.5f, 6, 1.0f, 1.0f, 1.0f, nightFactor);
-            }
+            drawCircle(stars[i][0], stars[i][1], 2.0f);
         }
     }
 }
@@ -1905,8 +1863,11 @@ void drawStars_obj102() {
 // [Obj-103]: Sun
 void drawSun_obj103() {
     if (sunY > 60.0f) {
-        drawCircle(sunX, sunY, 40.0f, 24, 1.0f, 0.85f, 0.30f, 0.40f);
-        drawCircle(sunX, sunY, 25.0f, 20, 1.0f, 0.95f, 0.50f, 1.0f);
+        glColor4f(1.0f, 0.85f, 0.30f, 0.40f);
+        drawCircle(sunX, sunY, 40.0f); // Glow Halo
+
+        glColor4f(1.0f, 0.95f, 0.50f, 1.0f);
+        drawCircle(sunX, sunY, 25.0f); // Core
     }
 }
 
@@ -1917,9 +1878,14 @@ void drawMoon_obj104() {
         float skyTopG = lerp(0.76f, 0.04f, nightFactor);
         float skyTopB = lerp(0.95f, 0.12f, nightFactor);
 
-        drawCircle(moonX, moonY, 30.0f, 20, 0.85f, 0.90f, 1.0f, 0.35f);
-        drawCircle(moonX, moonY, 20.0f, 20, 0.98f, 0.96f, 0.85f, 1.0f);
-        drawCircle(moonX + 8.0f, moonY + 4.0f, 17.0f, 20, skyTopR, skyTopG, skyTopB, 1.0f);
+        glColor4f(0.85f, 0.90f, 1.0f, 0.35f);
+        drawCircle(moonX, moonY, 30.0f); // Glow Halo
+
+        glColor4f(0.98f, 0.96f, 0.85f, 1.0f);
+        drawCircle(moonX, moonY, 20.0f); // Moon Disc
+
+        glColor4f(skyTopR, skyTopG, skyTopB, 1.0f);
+        drawCircle(moonX + 8.0f, moonY + 4.0f, 17.0f); // Sky cutout
     }
 }
 
@@ -1933,29 +1899,32 @@ void drawClouds_obj105() {
         float r = lerp(1.0f, 0.18f, nightFactor);
         float g = lerp(1.0f, 0.20f, nightFactor);
         float b = lerp(1.0f, 0.26f, nightFactor);
-        drawCircle(0.0f, 0.0f, 25.0f, 18, r, g, b);
-        drawCircle(-20.0f, -5.0f, 18.0f, 16, r, g, b);
-        drawCircle(20.0f, -5.0f, 18.0f, 16, r, g, b);
+
+        glColor3f(r, g, b);
+        drawCircle(0.0f, 0.0f, 25.0f);
+        drawCircle(-20.0f, -5.0f, 18.0f);
+        drawCircle(20.0f, -5.0f, 18.0f);
+
         glPopMatrix();
     }
 }
 
-// [Obj-106]: Flying Birds (Using 2D Mirror Reflection)[cite: 8]
+// [Obj-106]: Flying Birds
 void drawBirds_obj106() {
-    for (int i = 0; i < numBirds; ++i) {
-        float wing = sinf(birds[i].wingAngle) * 6.0f;
-        float dim = lerp(0.20f, 0.08f, nightFactor);
+    glLineWidth(2.0f);
+    glColor3f(0.15f, 0.15f, 0.15f); // Dark bird silhouette
+
+    for (int i = 0; i < numBirds; i++) {
+        float wingY = sinf(birds[i].wingAngle) * 6.0f;
 
         glPushMatrix();
         glTranslatef(birds[i].x, birds[i].y, 0.0f);
-        glScalef(birds[i].dir, 1.0f, 1.0f);
+        glScalef(birds[i].dir, 1.0f, 1.0f); // 1.0 = right, -1.0 = left
 
-        glLineWidth(2.5f);
-        glColor3f(dim, dim, dim);
         glBegin(GL_LINE_STRIP);
-        glVertex2f(-10.0f, wing);
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(10.0f, wing);
+        glVertex2f(-10.0f, wingY); // Left wing tip
+        glVertex2f(0.0f, 0.0f);    // Bird body center
+        glVertex2f(10.0f, wingY);  // Right wing tip
         glEnd();
 
         glPopMatrix();
@@ -1974,10 +1943,11 @@ void drawMountains_obj107() {
     glEnd();
 }
 
-// [Obj-108]: Background Roller Coaster (Using DDA Lines for Pillars)[cite: 10]
+// [Obj-108]: Background Roller Coaster
 void drawRollerCoaster_obj108() {
     float rideDim = lerp(1.0f, 0.30f, nightFactor);
 
+    // Track Rails
     glLineWidth(3.5f);
     glColor3f(0.85f * rideDim, 0.25f * rideDim, 0.22f * rideDim);
     glBegin(GL_LINE_STRIP);
@@ -1987,69 +1957,155 @@ void drawRollerCoaster_obj108() {
     glVertex2f(450.0f, 100.0f);
     glEnd();
 
+    // Support Pillars
+    glLineWidth(1.5f);
     glColor3f(0.70f * rideDim, 0.70f * rideDim, 0.75f * rideDim);
-    drawLineDDA_obj124(120.0f, 340.0f, 120.0f, 100.0f);
-    drawLineDDA_obj124(260.0f, 290.0f, 260.0f, 100.0f);
-    drawLineDDA_obj124(380.0f, 300.0f, 380.0f, 100.0f);
+    glBegin(GL_LINES);
+    glVertex2f(120.0f, 340.0f); glVertex2f(120.0f, 100.0f);
+    glVertex2f(260.0f, 290.0f); glVertex2f(260.0f, 100.0f);
+    glVertex2f(380.0f, 300.0f); glVertex2f(380.0f, 100.0f);
+    glEnd();
 }
 
 // [Obj-109]: Rotating Ferris Wheel
 void drawFerrisWheel_obj109() {
-    float rideDim = lerp(1.0f, 0.30f, nightFactor);
-    float fx = 1100.0f, fy = 320.0f, fr = 110.0f;
+    float cx = 1100.0f; // Center X
+    float cy = 320.0f;  // Center Y
+    float r  = 110.0f;  // Wheel Radius
+    float dim = lerp(1.0f, 0.35f, nightFactor);
 
-    // Static Support Legs
-    glLineWidth(3.5f);
-    glColor3f(0.35f * rideDim, 0.45f * rideDim, 0.65f * rideDim);
+    // 1. Support Legs
+    glLineWidth(3.0f);
+    glColor3f(0.40f * dim, 0.40f * dim, 0.50f * dim);
     glBegin(GL_LINES);
-    glVertex2f(fx, fy); glVertex2f(fx - 70.0f, 100.0f);
-    glVertex2f(fx, fy); glVertex2f(fx + 70.0f, 100.0f);
+    glVertex2f(cx, cy); glVertex2f(cx - 70.0f, 100.0f);
+    glVertex2f(cx, cy); glVertex2f(cx + 70.0f, 100.0f);
     glEnd();
 
-    // Wheel Rings
-    drawCircleOutline(fx, fy, fr, 36, 2.5f, 0.85f * rideDim, 0.65f * rideDim, 0.20f * rideDim);
-    drawCircleOutline(fx, fy, fr * 0.65f, 28, 1.5f, 0.85f * rideDim, 0.65f * rideDim, 0.20f * rideDim);
+    // 2. Wheel Rims
+    glLineWidth(2.5f);
+    glColor3f(0.85f * dim, 0.65f * dim, 0.20f * dim);
+    drawCircleOutline(cx, cy, r);       // Outer rim
+    drawCircleOutline(cx, cy, 70.0f);   // Inner rim
 
+    // 3. Rotating Spokes and Cabins
     glPushMatrix();
-    glTranslatef(fx, fy, 0.0f);
-    glRotatef(ferrisWheelAngle * (180.0f / M_PI), 0.0f, 0.0f, 1.0f);
+    glTranslatef(cx, cy, 0.0f);
+    glRotatef(ferrisWheelAngle * 57.2958f, 0.0f, 0.0f, 1.0f); // Spin wheel
 
     glLineWidth(1.5f);
-    glColor3f(0.75f * rideDim, 0.75f * rideDim, 0.80f * rideDim);
-    glBegin(GL_LINES);
-    for (int i = 0; i < 8; ++i) {
-        float angle = (float)i * (float)M_PI / 4.0f;
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(fr * cosf(angle), fr * sinf(angle));
-    }
-    glEnd();
+    float spokeDim = 0.75f * dim;
+    float redR = 0.95f * dim, redG = 0.25f * dim, redB = 0.20f * dim;
+    float yelR = 0.95f * dim, yelG = 0.80f * dim, yelB = 0.15f * dim;
 
-    for (int i = 0; i < 8; ++i) {
-        float angle = (float)i * (float)M_PI / 4.0f;
-        float gx = fr * cosf(angle);
-        float gy = fr * sinf(angle);
+    // Spoke 1 & Cabin 1 (Red)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(redR, redG, redB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
 
-        float cabR = (i % 2 == 0) ? 0.90f : 0.20f;
-        float cabG = (i % 3 == 0) ? 0.80f : 0.60f;
-        float cabB = (i % 2 != 0) ? 0.90f : 0.20f;
-        drawCircle(gx, gy, 7.5f, 10, cabR * rideDim, cabG * rideDim, cabB * rideDim);
-    }
+    // Spoke 2 & Cabin 2 (Yellow)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(yelR, yelG, yelB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
+    // Spoke 3 & Cabin 3 (Red)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(redR, redG, redB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
+    // Spoke 4 & Cabin 4 (Yellow)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(yelR, yelG, yelB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
+    // Spoke 5 & Cabin 5 (Red)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(redR, redG, redB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
+    // Spoke 6 & Cabin 6 (Yellow)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(yelR, yelG, yelB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
+    // Spoke 7 & Cabin 7 (Red)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(redR, redG, redB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
+    // Spoke 8 & Cabin 8 (Yellow)
+    glColor3f(spokeDim, spokeDim, 0.80f * dim);
+    glBegin(GL_LINES); glVertex2f(0.0f, 0.0f); glVertex2f(r, 0.0f); glEnd();
+    glColor3f(yelR, yelG, yelB);
+    drawCircle(r, 0.0f, 8.0f);
+    glRotatef(45.0f, 0.0f, 0.0f, 1.0f);
+
     glPopMatrix();
 
-    drawCircle(fx, fy, 10.0f, 14, 0.90f * rideDim, 0.75f * rideDim, 0.20f * rideDim);
+    // 4. Center Axle Cap
+    glColor3f(0.90f * dim, 0.75f * dim, 0.20f * dim);
+    drawCircle(cx, cy, 10.0f);
 }
 
-// [Obj-110]: Circus Big Top Tents
+// [Obj-110]: Background Circus Tent
 void drawCircusTents_obj110() {
-    float rideDim = lerp(1.0f, 0.30f, nightFactor);
+    float dim = lerp(1.0f, 0.30f, nightFactor);
+
+    float redR = 0.88f * dim, redG = 0.22f * dim, redB = 0.20f * dim;
+    float creamR = 0.95f * dim, creamG = 0.92f * dim, creamB = 0.85f * dim;
+
     glBegin(GL_TRIANGLES);
-    for (int i = -3; i < 3; ++i) {
-        if (i % 2 == 0) glColor3f(0.88f * rideDim, 0.22f * rideDim, 0.20f * rideDim);
-        else            glColor3f(0.95f * rideDim, 0.92f * rideDim, 0.85f * rideDim);
-        glVertex2f(360.0f, 230.0f);
-        glVertex2f(360.0f + i * 15.0f, 100.0f);
-        glVertex2f(360.0f + (i + 1) * 15.0f, 100.0f);
-    }
+
+    // Stripe 1 (Cream)
+    glColor3f(creamR, creamG, creamB);
+    glVertex2f(360.0f, 230.0f);
+    glVertex2f(315.0f, 100.0f);
+    glVertex2f(330.0f, 100.0f);
+
+    // Stripe 2 (Red)
+    glColor3f(redR, redG, redB);
+    glVertex2f(360.0f, 230.0f);
+    glVertex2f(330.0f, 100.0f);
+    glVertex2f(345.0f, 100.0f);
+
+    // Stripe 3 (Cream)
+    glColor3f(creamR, creamG, creamB);
+    glVertex2f(360.0f, 230.0f);
+    glVertex2f(345.0f, 100.0f);
+    glVertex2f(360.0f, 100.0f);
+
+    // Stripe 4 (Red)
+    glColor3f(redR, redG, redB);
+    glVertex2f(360.0f, 230.0f);
+    glVertex2f(360.0f, 100.0f);
+    glVertex2f(375.0f, 100.0f);
+
+    // Stripe 5 (Cream)
+    glColor3f(creamR, creamG, creamB);
+    glVertex2f(360.0f, 230.0f);
+    glVertex2f(375.0f, 100.0f);
+    glVertex2f(390.0f, 100.0f);
+
+    // Stripe 6 (Red)
+    glColor3f(redR, redG, redB);
+    glVertex2f(360.0f, 230.0f);
+    glVertex2f(390.0f, 100.0f);
+    glVertex2f(405.0f, 100.0f);
+
     glEnd();
 }
 
@@ -2070,38 +2126,51 @@ void drawTrees_obj111() {
         glVertex2f(x - 3.0f * s, 100.0f + 25.0f * s);
         glEnd();
 
-        drawCircle(x, 100.0f + 35.0f * s, 18.0f * s, 16, 0.18f * leafDim, 0.52f * leafDim, 0.18f * leafDim);
-        drawCircle(x - 10.0f * s, 100.0f + 30.0f * s, 14.0f * s, 14, 0.14f * leafDim, 0.44f * leafDim, 0.15f * leafDim);
-        drawCircle(x + 10.0f * s, 100.0f + 30.0f * s, 14.0f * s, 14, 0.14f * leafDim, 0.44f * leafDim, 0.15f * leafDim);
+        // 3-Circle Canopies
+        glColor3f(0.18f * leafDim, 0.52f * leafDim, 0.18f * leafDim);
+        drawCircle(x, 100.0f + 35.0f * s, 18.0f * s);
+        glColor3f(0.14f * leafDim, 0.44f * leafDim, 0.15f * leafDim);
+        drawCircle(x - 10.0f * s, 100.0f + 30.0f * s, 14.0f * s);
+        drawCircle(x + 10.0f * s, 100.0f + 30.0f * s, 14.0f * s);
     }
 }
 
 // [Obj-112]: Lamp Posts
 void drawLampPosts_obj112() {
     float lamps[] = { 320.0f, 490.0f, 790.0f, 970.0f };
-    float postDim = lerp(1.0f, 0.35f, nightFactor);
+    float dim = lerp(1.0f, 0.35f, nightFactor);
 
-    for (int i = 0; i < 4; ++i) {
+    // 1. Calculate colors once outside the loop
+    float postR = 0.20f * dim, postG = 0.22f * dim, postB = 0.25f * dim;
+    float bulbR = lerp(0.85f, 1.0f, nightFactor);
+    float bulbG = lerp(0.85f, 0.92f, nightFactor);
+    float bulbB = lerp(0.70f, 0.30f, nightFactor);
+
+    glLineWidth(3.0f);
+
+    for (int i = 0; i < 4; i++) {
         float x = lamps[i];
-        glLineWidth(3.0f);
-        glColor3f(0.20f * postDim, 0.22f * postDim, 0.25f * postDim);
+
+        // Lamp Pole Line
+        glColor3f(postR, postG, postB);
         glBegin(GL_LINES);
         glVertex2f(x, 90.0f);
         glVertex2f(x, 135.0f);
         glEnd();
 
-        float bulbR = lerp(0.85f, 1.0f, nightFactor);
-        float bulbG = lerp(0.85f, 0.92f, nightFactor);
-        float bulbB = lerp(0.70f, 0.30f, nightFactor);
-        drawCircle(x, 138.0f, 3.5f, 10, bulbR, bulbG, bulbB);
+        // Bulb Core
+        glColor3f(bulbR, bulbG, bulbB);
+        drawCircle(x, 138.0f, 3.5f);
 
+        // Night Glow Halo
         if (nightFactor > 0.1f) {
-            drawCircle(x, 138.0f, 20.0f, 16, 1.0f, 0.88f, 0.30f, 0.25f * nightFactor);
+            glColor4f(1.0f, 0.88f, 0.30f, 0.25f * nightFactor);
+            drawCircle(x, 138.0f, 20.0f);
         }
     }
 }
 
-// [Obj-113]: Ground & Promenade Walkway
+// [Obj-113]: Ground & Walkway
 void drawGround_obj113() {
     glBegin(GL_QUADS);
     glColor3f(lerp(0.24f, 0.08f, nightFactor), lerp(0.58f, 0.18f, nightFactor), lerp(0.26f, 0.10f, nightFactor));
@@ -2116,146 +2185,149 @@ void drawGround_obj113() {
     glEnd();
 }
 
-// [Obj-114]: Walking Humans (Using 2D Mirror Reflection Matrix)[cite: 8]
+// [Obj-114]: Walking Humans
 void drawHumans_obj114() {
-    for (int i = 0; i < numHumans; ++i) {
-        float dim = lerp(1.0f, 0.45f, nightFactor);
-        float swing = sinf(humans[i].legAngle);
+    float dim = lerp(1.0f, 0.45f, nightFactor);
+
+    for (int i = 0; i < numHumans; i++) {
+        float swing = sinf(humans[i].legAngle) * 8.0f; // Leg and arm swing motion
 
         glPushMatrix();
         glTranslatef(humans[i].x, humans[i].y, 0.0f);
-        glScalef(humans[i].dir, 1.0f, 1.0f);
+        glScalef(humans[i].dir, 1.0f, 1.0f); // 1 = walk right, -1 = walk left
 
-        // 1. Back Arm
-        glLineWidth(3.0f);
-        glColor3f(humans[i].r * 0.65f * dim, humans[i].g * 0.65f * dim, humans[i].b * 0.65f * dim);
-        glBegin(GL_LINES);
-        glVertex2f(2.0f, 23.0f);
-        glVertex2f(2.0f + swing * 7.5f, 13.0f);
-        glEnd();
-        drawCircle(2.0f + swing * 7.5f, 12.5f, 1.6f, 8, 0.82f * dim, 0.66f * dim, 0.52f * dim);
-
-        // 2. Back Leg
-        glLineWidth(4.0f);
-        glColor3f(0.16f * dim, 0.19f * dim, 0.26f * dim);
-        glBegin(GL_LINES);
-        glVertex2f(3.0f, 14.0f);
-        glVertex2f(3.0f - swing * 8.0f, 0.0f);
-        glEnd();
-
-        // 3. Torso
+        // 1. Torso (Shirt)
         glColor3f(humans[i].r * dim, humans[i].g * dim, humans[i].b * dim);
         glBegin(GL_QUADS);
-        glVertex2f(-5.5f, 14.0f); glVertex2f(5.5f, 14.0f);
-        glVertex2f(6.0f, 28.0f);  glVertex2f(-6.0f, 28.0f);
+        glVertex2f(-5.0f, 12.0f); glVertex2f(5.0f, 12.0f);
+        glVertex2f(5.0f, 26.0f);  glVertex2f(-5.0f, 26.0f);
         glEnd();
 
-        // 4. Front Leg
-        glLineWidth(4.0f);
-        glColor3f(0.22f * dim, 0.26f * dim, 0.35f * dim);
+        // 2. Head (Clean circle at top)
+        glColor3f(0.90f * dim, 0.75f * dim, 0.60f * dim);
+        drawCircle(0.0f, 32.0f, 5.0f);
+
+        // 3. Legs (Pants - swing forward and backward)
+        glLineWidth(3.5f);
+        glColor3f(0.20f * dim, 0.25f * dim, 0.35f * dim);
         glBegin(GL_LINES);
-        glVertex2f(-3.0f, 14.0f);
-        glVertex2f(-3.0f + swing * 8.0f, 0.0f);
+        glVertex2f(-2.0f, 12.0f); glVertex2f(-2.0f + swing, 0.0f); // Front leg
+        glVertex2f(2.0f, 12.0f);  glVertex2f(2.0f - swing, 0.0f); // Back leg
         glEnd();
 
-        // 5. Head
-        drawCircle(0.0f, 34.0f, 6.0f, 16, 0.92f * dim, 0.76f * dim, 0.62f * dim);
-
-        // 6. Front Arm
-        glLineWidth(3.0f);
-        glColor3f(humans[i].r * 0.85f * dim, humans[i].g * 0.85f * dim, humans[i].b * 0.85f * dim);
+        // 4. Arms (Swing in opposite direction to legs)
+        glColor3f(humans[i].r * 0.8f * dim, humans[i].g * 0.8f * dim, humans[i].b * 0.8f * dim);
         glBegin(GL_LINES);
-        glVertex2f(-2.0f, 23.0f);
-        glVertex2f(-2.0f - swing * 7.5f, 13.0f);
+        glVertex2f(-2.0f, 22.0f); glVertex2f(-2.0f - swing, 12.0f); // Front arm
+        glVertex2f(2.0f, 22.0f);  glVertex2f(2.0f + swing, 12.0f);  // Back arm
         glEnd();
-        drawCircle(-2.0f - swing * 7.5f, 12.5f, 1.8f, 8, 0.92f * dim, 0.76f * dim, 0.62f * dim);
 
         glPopMatrix();
     }
 }
 
-// [Obj-115]: Loading Platform & Railings
+// [Obj-115]: Ride Boarding Platform & Safety Railing
 void drawPlatform_obj115() {
+    // 1. Day/Night Color Calculations
     float platR = lerp(0.65f, 0.24f, nightFactor);
     float platG = lerp(0.65f, 0.25f, nightFactor);
     float platB = lerp(0.68f, 0.28f, nightFactor);
 
+    // 2. Platform Base Slab
     glBegin(GL_QUADS);
-    glColor3f(platR, platG, platB);
-    glVertex2f(450.0f, 95.0f);  glVertex2f(830.0f, 95.0f);
-    glColor3f(platR * 0.6f, platG * 0.6f, platB * 0.6f);
-    glVertex2f(850.0f, 72.0f);  glVertex2f(430.0f, 72.0f);
+        // Top deck surface
+        glColor3f(platR, platG, platB);
+        glVertex2f(450.0f, 95.0f);
+        glVertex2f(830.0f, 95.0f);
+
+        // Front face
+        glColor3f(platR * 0.6f, platG * 0.6f, platB * 0.6f);
+        glVertex2f(850.0f, 72.0f);
+        glVertex2f(430.0f, 72.0f);
     glEnd();
 
-    glColor3f(lerp(0.85f, 0.55f, nightFactor), lerp(0.72f, 0.42f, nightFactor), lerp(0.15f, 0.10f, nightFactor));
+    // 3. Safety Fence & Guard Railing
+    glColor3f(lerp(0.85f, 0.55f, nightFactor),
+              lerp(0.72f, 0.42f, nightFactor),
+              lerp(0.15f, 0.10f, nightFactor));
     glLineWidth(2.5f);
+
     glBegin(GL_LINES);
-    glVertex2f(455.0f, 115.0f); glVertex2f(825.0f, 115.0f);
-    glVertex2f(455.0f, 106.0f); glVertex2f(825.0f, 106.0f);
-    for (float rx = 460.0f; rx <= 820.0f; rx += 30.0f) {
-        glVertex2f(rx, 95.0f);  glVertex2f(rx, 117.0f);
-    }
+        // Top horizontal handrail bar
+        glVertex2f(455.0f, 115.0f);
+        glVertex2f(825.0f, 115.0f);
+
+        // Middle horizontal support bar
+        glVertex2f(455.0f, 106.0f);
+        glVertex2f(825.0f, 106.0f);
+
+        // Vertical safety pickets / posts (spaced evenly every 30 units)
+        for (float rx = 460.0f; rx <= 820.0f; rx += 30.0f) {
+            glVertex2f(rx, 95.0f);
+            glVertex2f(rx, 117.0f);
+        }
     glEnd();
 }
 
-// [Obj-116]: Operator Control Cabin (Using 2D Shearing Matrix)[cite: 8]
+
+// [Obj-116]: Operator Control Cabin
 void drawCabin_obj116() {
-    // Main Body
     glBegin(GL_QUADS);
+    // Cabin Body
     glColor3f(lerp(0.58f, 0.32f, nightFactor), lerp(0.32f, 0.16f, nightFactor), lerp(0.18f, 0.08f, nightFactor));
     glVertex2f(860.0f, 85.0f);  glVertex2f(930.0f, 85.0f);
     glVertex2f(930.0f, 150.0f); glVertex2f(860.0f, 150.0f);
 
+    // Roof Overhang
     glColor3f(lerp(0.85f, 0.48f, nightFactor), lerp(0.22f, 0.10f, nightFactor), lerp(0.18f, 0.08f, nightFactor));
     glVertex2f(850.0f, 150.0f); glVertex2f(940.0f, 150.0f);
     glVertex2f(920.0f, 170.0f); glVertex2f(870.0f, 170.0f);
-    glEnd();
 
-    // Cabin Window - Using Shearing Transformation to make it a slanted parallelogram[cite: 8]
-    glPushMatrix();
-    glTranslatef(872.0f, 122.0f, 0.0f);
-    applyShearX_obj124(0.25f);
-
+    // Window (Direct 4-point coordinates)
     glColor3f(lerp(0.68f, 1.0f, nightFactor), lerp(0.88f, 0.90f, nightFactor), lerp(0.98f, 0.35f, nightFactor));
-    glBegin(GL_QUADS);
-    glVertex2f(0.0f, 0.0f);   glVertex2f(46.0f, 0.0f);
-    glVertex2f(46.0f, 20.0f); glVertex2f(0.0f, 20.0f);
+    glVertex2f(872.0f, 122.0f); glVertex2f(918.0f, 122.0f);
+    glVertex2f(923.0f, 142.0f); glVertex2f(877.0f, 142.0f);
     glEnd();
-    glPopMatrix();
 }
 
 // [Obj-117]: Static A-Frame Support Structure
 void drawAFrameTower_obj117() {
-    float colR = lerp(0.82f, 0.42f, nightFactor);
-    float colG = lerp(0.60f, 0.28f, nightFactor);
-    float colB = lerp(0.18f, 0.08f, nightFactor);
+    float dim = lerp(1.0f, 0.40f, nightFactor);
 
+    float legR = 0.82f * dim, legG = 0.60f * dim, legB = 0.18f * dim;
+    float beamR = 0.72f * dim, beamG = 0.20f * dim, beamB = 0.15f * dim;
+    float baseR = 0.35f * dim, baseG = 0.35f * dim, baseB = 0.37f * dim;
+
+    // 1. Concrete Footers
+    glColor3f(baseR, baseG, baseB);
     glBegin(GL_QUADS);
-    glColor3f(colR, colG, colB);
-    glVertex2f(365.0f, 85.0f);  glVertex2f(395.0f, 85.0f);
-    glVertex2f(620.0f, 540.0f); glVertex2f(602.0f, 540.0f);
-    glColor3f(colR * 0.65f, colG * 0.65f, colB * 0.65f);
-    glVertex2f(380.0f, 85.0f);  glVertex2f(395.0f, 85.0f);
-    glVertex2f(620.0f, 540.0f); glVertex2f(612.0f, 540.0f);
-
-    glColor3f(colR, colG, colB);
-    glVertex2f(885.0f, 85.0f);  glVertex2f(915.0f, 85.0f);
-    glVertex2f(678.0f, 540.0f); glVertex2f(660.0f, 540.0f);
-    glColor3f(colR * 0.65f, colG * 0.65f, colB * 0.65f);
-    glVertex2f(885.0f, 85.0f);  glVertex2f(900.0f, 85.0f);
-    glVertex2f(668.0f, 540.0f); glVertex2f(660.0f, 540.0f);
+    glVertex2f(350.0f, 80.0f);  glVertex2f(405.0f, 80.0f);
+    glVertex2f(400.0f, 105.0f); glVertex2f(355.0f, 105.0f);
+    glVertex2f(875.0f, 80.0f);  glVertex2f(930.0f, 80.0f);
+    glVertex2f(925.0f, 105.0f); glVertex2f(870.0f, 105.0f);
     glEnd();
 
-    glLineWidth(6.0f);
-    glColor3f(lerp(0.72f, 0.42f, nightFactor), lerp(0.20f, 0.08f, nightFactor), lerp(0.15f, 0.06f, nightFactor));
+    // 2. Main Angled Tower Legs
+    glColor3f(legR, legG, legB);
+    glBegin(GL_QUADS);
+    glVertex2f(365.0f, 85.0f);  glVertex2f(395.0f, 85.0f);
+    glVertex2f(620.0f, 540.0f); glVertex2f(602.0f, 540.0f);
+    glVertex2f(885.0f, 85.0f);  glVertex2f(915.0f, 85.0f);
+    glVertex2f(678.0f, 540.0f); glVertex2f(660.0f, 540.0f);
+    glEnd();
+
+    // 3. Horizontal Support Crossbars
+    glLineWidth(5.0f);
+    glColor3f(beamR, beamG, beamB);
     glBegin(GL_LINES);
     glVertex2f(450.0f, 220.0f); glVertex2f(830.0f, 220.0f);
     glVertex2f(510.0f, 330.0f); glVertex2f(770.0f, 330.0f);
     glVertex2f(565.0f, 435.0f); glVertex2f(715.0f, 435.0f);
     glEnd();
 
-    glLineWidth(3.0f);
-    glColor3f(colR * 0.75f, colG * 0.75f, colB * 0.75f);
+    // 4. Diagonal Crosses
+    glLineWidth(2.5f);
+    glColor3f(legR * 0.75f, legG * 0.75f, legB * 0.75f);
     glBegin(GL_LINES);
     glVertex2f(450.0f, 220.0f); glVertex2f(770.0f, 330.0f);
     glVertex2f(830.0f, 220.0f); glVertex2f(510.0f, 330.0f);
@@ -2263,76 +2335,88 @@ void drawAFrameTower_obj117() {
     glVertex2f(770.0f, 330.0f); glVertex2f(565.0f, 435.0f);
     glEnd();
 
-    glBegin(GL_QUADS);
-    glColor3f(lerp(0.35f, 0.20f, nightFactor), lerp(0.35f, 0.20f, nightFactor), lerp(0.37f, 0.22f, nightFactor));
-    glVertex2f(350.0f, 80.0f);  glVertex2f(405.0f, 80.0f);
-    glVertex2f(400.0f, 105.0f); glVertex2f(355.0f, 105.0f);
-    glVertex2f(875.0f, 80.0f);  glVertex2f(930.0f, 80.0f);
-    glVertex2f(925.0f, 105.0f); glVertex2f(870.0f, 105.0f);
-    glEnd();
+    // 5. Decorative Night Fairy Lights
+    if (nightFactor > 0.05f) {
+        glColor4f(1.0f, 0.85f, 0.20f, nightFactor);
 
-    if (nightFactor > 0.01f) {
-        for (int i = 0; i <= 14; ++i) {
-            float f = (float)i / 14.0f;
-            float leftX = 380.0f + (611.0f - 380.0f) * f;
-            float rightX = 900.0f + (669.0f - 900.0f) * f;
-            float y = 85.0f + (540.0f - 85.0f) * f;
-            float lr = 0.5f + 0.5f * sinf(timeStep * 4.0f + i * 0.4f);
-            float lg = 0.5f + 0.5f * sinf(timeStep * 4.0f + i * 0.4f + 2.0f);
-            float lb = 0.5f + 0.5f * sinf(timeStep * 4.0f + i * 0.4f + 4.0f);
-            drawCircle(leftX, y, 3.5f, 8, lr, lg, lb, nightFactor);
-            drawCircle(rightX, y, 3.5f, 8, lr, lg, lb, nightFactor);
+        float leftX  = 380.0f; // Start at bottom of left leg
+        float rightX = 900.0f; // Start at bottom of right leg
+        float y      = 100.0f; // Start height
+
+        for (int i = 0; i < 6; i++) {
+            drawCircle(leftX,  y, 4.0f);
+            drawCircle(rightX, y, 4.0f);
+
+            // Move inwards and upwards to next position
+            leftX  += 45.0f;
+            rightX -= 45.0f;
+            y      += 80.0f;
         }
     }
 }
 
 // [Obj-118]: Pivot Axle & Wheel Hub
 void drawPivotHub_obj118() {
-    drawCircle(640.0f, 540.0f, 42.0f, 32, lerp(0.48f, 0.22f, nightFactor), lerp(0.26f, 0.10f, nightFactor), lerp(0.12f, 0.05f, nightFactor));
-    drawCircleOutline(640.0f, 540.0f, 38.0f, 32, 5.0f, lerp(0.88f, 0.50f, nightFactor), lerp(0.72f, 0.38f, nightFactor), lerp(0.20f, 0.10f, nightFactor));
-    drawCircle(640.0f, 540.0f, 16.0f, 20, lerp(0.25f, 0.15f, nightFactor), lerp(0.25f, 0.15f, nightFactor), lerp(0.28f, 0.18f, nightFactor));
-    drawCircle(640.0f, 540.0f, 7.0f, 14, lerp(0.90f, 0.70f, nightFactor), lerp(0.85f, 0.65f, nightFactor), lerp(0.30f, 0.20f, nightFactor));
+    // 1. Base Brown Hub Disc
+    glColor3f(0.40f, 0.25f, 0.10f);
+    drawCircle(640.0f, 540.0f, 40.0f);
 
-    glLineWidth(4.0f);
-    glColor3f(lerp(0.88f, 0.50f, nightFactor), lerp(0.72f, 0.38f, nightFactor), lerp(0.20f, 0.10f, nightFactor));
+    // 2. Cross Spokes (+ Shape with direct numbers)
+    glLineWidth(3.0f);
+    glColor3f(0.85f, 0.70f, 0.20f);
     glBegin(GL_LINES);
-    for (int i = 0; i < 8; ++i) {
-        float angle = (float)i * (float)M_PI / 4.0f;
-        glVertex2f(640.0f, 540.0f);
-        glVertex2f(640.0f + 48.0f * cosf(angle), 540.0f + 48.0f * sinf(angle));
-    }
+    // Horizontal spoke (Left to Right)
+    glVertex2f(600.0f, 540.0f);
+    glVertex2f(680.0f, 540.0f);
+
+    // Vertical spoke (Bottom to Top)
+    glVertex2f(640.0f, 500.0f);
+    glVertex2f(640.0f, 580.0f);
     glEnd();
+
+    // 3. Center Axle Cap
+    glColor3f(0.20f, 0.20f, 0.20f);
+    drawCircle(640.0f, 540.0f, 12.0f);
 }
 
-// [Obj-119]: Suspension Trusses (Connecting Pivot to Lowered Hull)
+// [Obj-119]: Suspension Trusses
 void drawSuspensionStruts_obj119(Point topP0, Point topP1, Point topP2) {
+    float dim = lerp(1.0f, 0.40f, nightFactor);
+
     Point attachL_outer = getBezierPoint(topP0, topP1, topP2, 0.18f);
     Point attachR_outer = getBezierPoint(topP0, topP1, topP2, 0.82f);
     Point attachL_inner = getBezierPoint(topP0, topP1, topP2, 0.37f);
     Point attachR_inner = getBezierPoint(topP0, topP1, topP2, 0.63f);
 
-    glLineWidth(5.0f);
-    glColor3f(lerp(0.78f, 0.38f, nightFactor), lerp(0.22f, 0.08f, nightFactor), lerp(0.18f, 0.06f, nightFactor));
+    // 2. Four Main Suspension Rods (Top Pivot down to Ship Deck)
+    glLineWidth(4.0f);
+    glColor3f(0.78f * dim, 0.22f * dim, 0.18f * dim);
     glBegin(GL_LINES);
     glVertex2f(-12.0f, -5.0f); glVertex2f(attachL_outer.x, attachL_outer.y);
-    glVertex2f(12.0f, -5.0f);  glVertex2f(attachR_outer.x, attachR_outer.y);
-    glVertex2f(-5.0f, -5.0f);  glVertex2f(attachL_inner.x, attachL_inner.y);
-    glVertex2f(5.0f, -5.0f);   glVertex2f(attachR_inner.x, attachR_inner.y);
+    glVertex2f( 12.0f, -5.0f); glVertex2f(attachR_outer.x, attachR_outer.y);
+    glVertex2f( -5.0f, -5.0f); glVertex2f(attachL_inner.x, attachL_inner.y);
+    glVertex2f(  5.0f, -5.0f); glVertex2f(attachR_inner.x, attachR_inner.y);
     glEnd();
 
-    glLineWidth(2.5f);
-    glColor3f(lerp(0.90f, 0.50f, nightFactor), lerp(0.75f, 0.40f, nightFactor), lerp(0.25f, 0.10f, nightFactor));
+    // 3. Horizontal Ladder Rungs
+    glLineWidth(2.0f);
+    glColor3f(0.90f * dim, 0.75f * dim, 0.25f * dim);
     glBegin(GL_LINES);
-    for (float f = 0.12f; f <= 0.90f; f += 0.11f) {
-        glVertex2f(-12.0f + (attachL_outer.x + 12.0f) * f, -5.0f + (attachL_outer.y + 5.0f) * f);
-        glVertex2f(-5.0f  + (attachL_inner.x + 5.0f)  * f, -5.0f + (attachL_inner.y + 5.0f) * f);
-        glVertex2f(12.0f  + (attachR_outer.x - 12.0f) * f, -5.0f + (attachR_outer.y + 5.0f) * f);
-        glVertex2f(5.0f   + (attachR_inner.x - 5.0f)  * f, -5.0f + (attachR_inner.y + 5.0f) * f);
+    for (int i = 1; i <= 4; i++) {
+        float f = i * 0.20f; // 20%, 40%, 60%, 80% down the rods
+
+        // Left strut crossbar
+        glVertex2f(lerp(-12.0f, attachL_outer.x, f), lerp(-5.0f, attachL_outer.y, f));
+        glVertex2f(lerp( -5.0f, attachL_inner.x, f), lerp(-5.0f, attachL_inner.y, f));
+
+        // Right strut crossbar
+        glVertex2f(lerp( 12.0f, attachR_outer.x, f), lerp(-5.0f, attachR_outer.y, f));
+        glVertex2f(lerp(  5.0f, attachR_inner.x, f), lerp(-5.0f, attachR_inner.y, f));
     }
     glEnd();
 }
 
-// [Obj-120]: Ship Mast & Crow's Nest (Lowered with Boat)
+// [Obj-120]: Ship Mast & Crow's Nest
 void drawMastAndSail_obj120(Point mastBase) {
     glLineWidth(6.0f);
     glColor3f(lerp(0.38f, 0.18f, nightFactor), lerp(0.20f, 0.08f, nightFactor), lerp(0.10f, 0.04f, nightFactor));
@@ -2352,56 +2436,61 @@ void drawMastAndSail_obj120(Point mastBase) {
     glEnd();
 }
 
-// [Obj-121]: Parametric Bézier Ship Hull[cite: 6]
+// [Obj-121]: Parametric Bézier Ship Hull
 void drawShipHull_obj121(Point topP0, Point topP1, Point topP2, Point botP0, Point botP1, Point botP2) {
-    const int segments = 36;
-    float hullR = lerp(0.42f, 0.20f, nightFactor);
-    float hullG = lerp(0.22f, 0.10f, nightFactor);
-    float hullB = lerp(0.10f, 0.05f, nightFactor);
+    const int segments = 20; // 20 steps provide a smooth hull curve
+    float dim = lerp(1.0f, 0.40f, nightFactor);
 
-    glBegin(GL_QUAD_STRIP);
+    // Pre-calculate unified color tones
+    float hullR = 0.42f * dim, hullG = 0.22f * dim, hullB = 0.10f * dim; // Dark wood
+    float redR  = 0.75f * dim, redG  = 0.18f * dim, redB  = 0.16f * dim; // Crimson stripe
+    float goldR = 0.92f * dim, goldG = 0.78f * dim, goldB = 0.24f * dim; // Gold trims
+
+    // 1. Main Wooden Hull Body (Connects top deck to bottom keel)
     glColor3f(hullR, hullG, hullB);
-    for (int i = 0; i <= segments; ++i) {
-        float t = (float)i / (float)segments;
-        Point topPt = getBezierPoint(topP0, topP1, topP2, t);
-        Point botPt = getBezierPoint(botP0, botP1, botP2, t);
-        glVertex2f(topPt.x, topPt.y);
-        glVertex2f(botPt.x, botPt.y);
-    }
-    glEnd();
-
     glBegin(GL_QUAD_STRIP);
-    glColor3f(lerp(0.75f, 0.45f, nightFactor), lerp(0.18f, 0.08f, nightFactor), lerp(0.16f, 0.08f, nightFactor));
-    for (int i = 2; i <= segments - 2; ++i) {
-        float t = (float)i / (float)segments;
-        Point topPt = getBezierPoint(topP0, topP1, topP2, t);
-        Point botPt = getBezierPoint(botP0, botP1, botP2, t);
-        glVertex2f(topPt.x, botPt.y + 0.35f * (topPt.y - botPt.y));
-        glVertex2f(topPt.x, botPt.y + 0.55f * (topPt.y - botPt.y));
+    for (int i = 0; i <= segments; i++) {
+        float t = (float)i / segments;
+        Point top = getBezierPoint(topP0, topP1, topP2, t);
+        Point bot = getBezierPoint(botP0, botP1, botP2, t);
+        glVertex2f(top.x, top.y);
+        glVertex2f(bot.x, bot.y);
     }
     glEnd();
 
-    glLineWidth(3.5f);
-    glColor3f(lerp(0.92f, 0.65f, nightFactor), lerp(0.78f, 0.50f, nightFactor), lerp(0.24f, 0.12f, nightFactor));
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= segments; ++i) {
-        float t = (float)i / (float)segments;
-        Point pt = getBezierPoint(topP0, topP1, topP2, t);
+    // 2. Red Decorative Mid-Hull Stripe
+    glColor3f(redR, redG, redB);
+    glBegin(GL_QUAD_STRIP);
+    for (int i = 2; i <= segments - 2; i++) {
+        float t = (float)i / segments;
+        Point top = getBezierPoint(topP0, topP1, topP2, t);
+        Point bot = getBezierPoint(botP0, botP1, botP2, t);
+        glVertex2f(top.x, lerp(bot.y, top.y, 0.35f)); // Stripe lower edge
+        glVertex2f(top.x, lerp(bot.y, top.y, 0.55f)); // Stripe upper edge
+    }
+    glEnd();
+
+    // 3. Golden Edge Trims
+    glColor3f(goldR, goldG, goldB);
+    glLineWidth(3.0f);
+    glBegin(GL_LINE_STRIP); // Top deck trim
+    for (int i = 0; i <= segments; i++) {
+        Point pt = getBezierPoint(topP0, topP1, topP2, (float)i / segments);
         glVertex2f(pt.x, pt.y);
     }
     glEnd();
 
-    glLineWidth(2.5f);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= segments; ++i) {
-        float t = (float)i / (float)segments;
-        Point pt = getBezierPoint(botP0, botP1, botP2, t);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_STRIP); // Bottom keel trim
+    for (int i = 0; i <= segments; i++) {
+        Point pt = getBezierPoint(botP0, botP1, botP2, (float)i / segments);
         glVertex2f(pt.x, pt.y);
     }
     glEnd();
 
+    // 4. Front Bowsprit
+    glColor3f(goldR, goldG, goldB);
     glBegin(GL_TRIANGLES);
-    glColor3f(lerp(0.92f, 0.65f, nightFactor), lerp(0.78f, 0.50f, nightFactor), lerp(0.24f, 0.12f, nightFactor));
     glVertex2f(topP0.x, topP0.y);
     glVertex2f(-205.0f, -295.0f);
     glVertex2f(botP0.x, botP0.y);
@@ -2411,14 +2500,17 @@ void drawShipHull_obj121(Point topP0, Point topP1, Point topP2, Point botP0, Poi
     glVertex2f(-190.0f, -290.0f);
     glEnd();
 
+    // 5. Stern Cabin & Golden Window
+    Point sternTop = getBezierPoint(topP0, topP1, topP2, 0.91f);
     glBegin(GL_QUADS);
+
     glColor3f(hullR * 0.8f, hullG * 0.8f, hullB * 0.8f);
-    glVertex2f(145.0f, getBezierPoint(topP0, topP1, topP2, 0.91f).y);
+    glVertex2f(145.0f, sternTop.y);
     glVertex2f(topP2.x, topP2.y);
     glVertex2f(165.0f, -285.0f);
     glVertex2f(130.0f, -330.0f);
 
-    glColor3f(lerp(0.95f, 1.0f, nightFactor), lerp(0.85f, 0.90f, nightFactor), lerp(0.35f, 0.35f, nightFactor));
+    glColor3f(0.95f, 0.85f, 0.35f * dim);
     glVertex2f(148.0f, -322.0f);
     glVertex2f(165.0f, -300.0f);
     glVertex2f(160.0f, -292.0f);
@@ -2426,75 +2518,114 @@ void drawShipHull_obj121(Point topP0, Point topP1, Point topP2, Point botP0, Poi
     glEnd();
 }
 
-// [Obj-122]: Tiered Passenger Benches & Viking Shields[cite: 6]
+// [Obj-122]: Tiered Passenger Benches & Viking Shields
 void drawBenchesAndShields_obj122(Point topP0, Point topP1, Point topP2) {
-    for (int i = 0; i < 9; ++i) {
-        float t = 0.16f + (float)i * 0.085f;
-        Point seatPt = getBezierPoint(topP0, topP1, topP2, t);
+    float dim = lerp(1.0f, 0.45f, nightFactor);
 
+    float benchR = 0.20f * dim, benchG = 0.20f * dim, benchB = 0.22f * dim;
+    float barR   = 0.85f * dim, barG   = 0.85f * dim, barB   = 0.90f * dim;
+    float goldR  = 0.85f * dim, goldG  = 0.75f * dim, goldB  = 0.20f * dim;
+
+    // 1. Passenger Benches (9 seats along the deck curve)
+    glLineWidth(2.5f);
+    for (int i = 0; i < 9; i++) {
+        float t = 0.16f + (i * 0.085f); // Position along curve (bow to stern)
+        Point seat = getBezierPoint(topP0, topP1, topP2, t);
+
+        // Bench seat cushion & backrest
+        glColor3f(benchR, benchG, benchB);
         glBegin(GL_QUADS);
-        glColor3f(lerp(0.20f, 0.12f, nightFactor), lerp(0.20f, 0.12f, nightFactor), lerp(0.22f, 0.14f, nightFactor));
-        glVertex2f(seatPt.x - 8.0f, seatPt.y - 14.0f);
-        glVertex2f(seatPt.x + 8.0f, seatPt.y - 14.0f);
-        glVertex2f(seatPt.x + 8.0f, seatPt.y + 2.0f);
-        glVertex2f(seatPt.x - 8.0f, seatPt.y + 2.0f);
+        glVertex2f(seat.x - 8.0f, seat.y - 14.0f);
+        glVertex2f(seat.x + 8.0f, seat.y - 14.0f);
+        glVertex2f(seat.x + 8.0f, seat.y + 2.0f);
+        glVertex2f(seat.x - 8.0f, seat.y + 2.0f);
         glEnd();
 
-        glLineWidth(2.5f);
-        glColor3f(lerp(0.85f, 0.50f, nightFactor), lerp(0.85f, 0.50f, nightFactor), lerp(0.90f, 0.55f, nightFactor));
+        // Safety bar
+        glColor3f(barR, barG, barB);
         glBegin(GL_LINES);
-        glVertex2f(seatPt.x - 10.0f, seatPt.y - 6.0f);
-        glVertex2f(seatPt.x + 10.0f, seatPt.y - 6.0f);
+        glVertex2f(seat.x - 10.0f, seat.y - 6.0f);
+        glVertex2f(seat.x + 10.0f, seat.y - 6.0f);
         glEnd();
     }
 
-    for (int i = 0; i < 8; ++i) {
-        float t = 0.12f + (float)i * 0.11f;
-        Point shieldPt = getBezierPoint(topP0, topP1, topP2, t);
+    // 2. Shields (8 decorative shields along ship hull)
+    for (int i = 0; i < 8; i++) {
+        float t = 0.12f + (i * 0.11f);
+        Point shield = getBezierPoint(topP0, topP1, topP2, t);
+        float cx = shield.x;
+        float cy = shield.y - 10.0f; // Center point of shield
 
-        float r1 = 0.2f, g1 = 0.4f, b1 = 0.7f;
-        float r2 = 0.8f, g2 = 0.8f, b2 = 0.8f;
-        if (i % 3 == 1) { r1 = 0.75f; g1 = 0.2f; b1 = 0.2f; r2 = 0.85f; g2 = 0.75f; b2 = 0.2f; }
-        else if (i % 3 == 2) { r1 = 0.2f; g1 = 0.6f; b1 = 0.3f; r2 = 0.9f; g2 = 0.9f; b2 = 0.9f; }
-
-        float dim = lerp(1.0f, 0.45f, nightFactor);
-        drawCircle(shieldPt.x, shieldPt.y - 10.0f, 10.0f, 20, r1 * dim, g1 * dim, b1 * dim);
-        drawCircle(shieldPt.x, shieldPt.y - 10.0f, 7.0f, 16, r2 * dim, g2 * dim, b2 * dim);
-        drawCircle(shieldPt.x, shieldPt.y - 10.0f, 2.8f, 12, 0.85f * dim, 0.75f * dim, 0.2f * dim);
-    }
-}
-
-// [Obj-123]: Dynamic Night LEDs along Boat Keel
-void drawBoatKeelLEDs_obj123(Point botP0, Point botP1, Point botP2) {
-    if (nightFactor > 0.01f) {
-        for (int i = 0; i <= 8; ++i) {
-            float t = (float)i / 8.0f;
-            Point ledPt = getBezierPoint(botP0, botP1, botP2, t);
-
-            float r = 0.5f + 0.5f * sinf(timeStep * 5.0f + i * 0.8f);
-            float g = 0.5f + 0.5f * sinf(timeStep * 5.0f + i * 0.8f + 2.0f);
-            float b = 0.5f + 0.5f * sinf(timeStep * 5.0f + i * 0.8f + 4.0f);
-            drawCircle(ledPt.x, ledPt.y, 4.0f, 8, r, g, b, nightFactor);
+        // Alternate color patterns
+        if (i % 3 == 0) {
+            glColor3f(0.20f * dim, 0.40f * dim, 0.70f * dim); // Blue outer rim
+            drawCircle(cx, cy, 10.0f);
+            glColor3f(0.80f * dim, 0.80f * dim, 0.80f * dim); // White inner disc
+            drawCircle(cx, cy, 7.0f);
         }
+        else if (i % 3 == 1) {
+            glColor3f(0.75f * dim, 0.20f * dim, 0.20f * dim); // Red outer rim
+            drawCircle(cx, cy, 10.0f);
+            glColor3f(0.85f * dim, 0.75f * dim, 0.20f * dim); // Gold inner disc
+            drawCircle(cx, cy, 7.0f);
+        }
+        else {
+            glColor3f(0.20f * dim, 0.60f * dim, 0.30f * dim); // Green outer rim
+            drawCircle(cx, cy, 10.0f);
+            glColor3f(0.90f * dim, 0.90f * dim, 0.90f * dim); // White inner disc
+            drawCircle(cx, cy, 7.0f);
+        }
+
+        // Center golden
+        glColor3f(goldR, goldG, goldB);
+        drawCircle(cx, cy, 2.8f);
     }
 }
 
-// [Obj-125]: HIERARCHICAL SHIP ASSEMBLY
-void drawPirateShipAssembly_obj125() {
+// [Obj-123]: Dynamic Night LEDs
+void drawBoatKeelLEDs_obj123(Point botP0, Point botP1, Point botP2) {
+    if (nightFactor < 0.05f) return; // Only turn on lights during night
+
+    for (int i = 0; i <= 8; i++) {
+        float t = (float)i / 8.0f; // Steps evenly
+        Point led = getBezierPoint(botP0, botP1, botP2, t);
+
+        // Alternate colors
+        if (i % 2 == 0) {
+            glColor4f(1.0f, 0.85f, 0.20f, nightFactor); // Golden Yellow LED
+        } else {
+            glColor4f(0.20f, 0.85f, 1.0f, nightFactor); // Cyan Blue LED
+        }
+
+        drawCircle(led.x, led.y, 4.0f);
+    }
+}
+
+// Complete Pirate Ship Assembly & Swing Transformation
+void drawPirateShipAssembly() {
     glPushMatrix();
+
+    // 1. Pivot at top and apply pendulum swing angle
     glTranslatef(640.0f, 540.0f, 0.0f);
     glRotatef(swingAngle, 0.0f, 0.0f, 1.0f);
 
+    // 2. Fixed Control Points for Ship Geometry
+    // Top deck curve
     Point topP0 = { -175.0f, -315.0f };
     Point topP1 = {    0.0f, -385.0f };
     Point topP2 = {  175.0f, -315.0f };
 
+    // Bottom keel curve
     Point botP0 = { -175.0f, -365.0f };
     Point botP1 = {    0.0f, -475.0f };
     Point botP2 = {  175.0f, -365.0f };
 
+    // Deck center point
+    Point mastBase = { 0.0f, -350.0f };
+
+    // 3. Render in Layered Order
     drawSuspensionStruts_obj119(topP0, topP1, topP2);
-    drawMastAndSail_obj120(getBezierPoint(topP0, topP1, topP2, 0.5f));
+    drawMastAndSail_obj120(mastBase);
     drawShipHull_obj121(topP0, topP1, topP2, botP0, botP1, botP2);
     drawBenchesAndShields_obj122(topP0, topP1, topP2);
     drawBoatKeelLEDs_obj123(botP0, botP1, botP2);
@@ -2502,16 +2633,15 @@ void drawPirateShipAssembly_obj125() {
     glPopMatrix();
 }
 
-// =========================================================
 // DISPLAY CALLBACK
-// =========================================================
+// ================
 
 void displayScene2() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glPushMatrix();
 
-    // Render Environment & Still Objects
+    // Render Environment & Objects
     drawSky_obj101();
     drawStars_obj102();
     drawSun_obj103();
@@ -2528,90 +2658,90 @@ void displayScene2() {
     drawHumans_obj114();
     drawPlatform_obj115();
     drawCabin_obj116();
-
-    // Render Dynamic Rides
-    drawPirateShipAssembly_obj125();
+    drawPirateShipAssembly();
     drawAFrameTower_obj117();
     drawPivotHub_obj118();
 
     glPopMatrix();
 
-    glFlush();
+    glutSwapBuffers();
 }
 
-// =========================================================
-// ANIMATION TIMER CALLBACK[cite: 1]
-// =========================================================
+// ANIMATION TIMER CALLBACK
+// ========================
 
+
+// Master Animation Timer
 void timerScene2(int value) {
     if (!isPaused) {
-        float dt = 0.016f;
-        timeStep += 0.025f;
+        // 1. Pirate Ship Pendulum Swing
+        swingAngle += swingDir * 0.6f;
+        if (swingAngle > maxSwingAngle) {
+            swingAngle = maxSwingAngle;
+            swingDir = -1.0f; // Reverse direction to swing left
+        } else if (swingAngle < -maxSwingAngle) {
+            swingAngle = -maxSwingAngle;
+            swingDir = 1.0f;  // Reverse direction to swing right
+        }
 
-        // [A-101]: Pendulum Simple Harmonic Motion
-        swingAngle = maxSwingAngle * sinf(swingSpeed * timeStep);
-
-        // [A-102]: Ferris Wheel Rotation Animation
+        // 2. Ferris Wheel Rotation
         ferrisWheelAngle += 0.012f;
-        if (ferrisWheelAngle >= 2.0f * (float)M_PI) {
-            ferrisWheelAngle -= 2.0f * (float)M_PI;
+        if (ferrisWheelAngle > 6.283f) {
+            ferrisWheelAngle = 0.0f;
         }
 
-        // [A-103]: Day / Night Cycle Timer & Interpolation Factor
-        cycleTimer += dt;
-        if (cycleTimer >= totalCycleTime) {
-            cycleTimer -= totalCycleTime;
+        // 3. Day / Night 12-Second Cycle
+        cycleTimer += 0.016f;
+        if (cycleTimer >= 12.0f) {
+            cycleTimer = 0.0f;
         }
 
+        // Day/Night brightness factor (0.0 = Day, 1.0 = Night)
         if (cycleTimer < 5.0f) {
             nightFactor = 0.0f;
         } else if (cycleTimer < 6.0f) {
-            nightFactor = cycleTimer - 5.0f;
+            nightFactor = cycleTimer - 5.0f;  // Sunset transition
         } else if (cycleTimer < 11.0f) {
             nightFactor = 1.0f;
         } else {
-            nightFactor = 1.0f - (cycleTimer - 11.0f);
+            nightFactor = 12.0f - cycleTimer; // Sunrise transition
         }
 
-        // [A-104]: Sun & Moon Arc Trajectories
+        // 4. Sun & Moon Parabolic Sky Arcs
         if (cycleTimer <= 6.0f) {
-            float sunPhase = cycleTimer / 6.0f;
-            float sunAngle = (1.0f - sunPhase) * (float)M_PI;
-            sunX = 640.0f - 450.0f * cosf(sunAngle);
-            sunY = 220.0f + 450.0f * sinf(sunAngle);
+            // Day: Sun moves along a parabolic arch from left to right
+            float p = cycleTimer / 6.0f; // Progress from 0.0 (rise) to 1.0 (set)
+            sunX = 190.0f + p * 900.0f;
+            sunY = 220.0f + 450.0f * (4.0f * p * (1.0f - p)); // Parabola curve
+            moonY = -100.0f; // Hide Moon
         } else {
-            sunY = -100.0f;
+            // Night: Moon moves along the same sky arch
+            float p = (cycleTimer - 6.0f) / 6.0f; // Progress from 0.0 to 1.0
+            moonX = 190.0f + p * 900.0f;
+            moonY = 220.0f + 450.0f * (4.0f * p * (1.0f - p)); // Parabola curve
+            sunY = -100.0f; // Hide Sun
         }
 
-        if (cycleTimer > 6.0f) {
-            float moonPhase = (cycleTimer - 6.0f) / 6.0f;
-            float moonAngle = (1.0f - moonPhase) * (float)M_PI;
-            moonX = 640.0f - 450.0f * cosf(moonAngle);
-            moonY = 220.0f + 450.0f * sinf(moonAngle);
-        } else {
-            moonY = -100.0f;
-        }
-
-        // [A-106]: Cloud Drift Movement
-        for (int i = 0; i < numClouds; ++i) {
+        // 5. Cloud Drifting
+        for (int i = 0; i < numClouds; i++) {
             clouds[i].x += clouds[i].speed;
             if (clouds[i].x > 1450.0f) clouds[i].x = -150.0f;
         }
 
-        // [A-107]: Bird Flight & Wing Flap
-        for (int i = 0; i < numBirds; ++i) {
+        // 6. Bird Flight & Wing Flapping
+        for (int i = 0; i < numBirds; i++) {
             birds[i].x += birds[i].speed;
             birds[i].wingAngle += 0.18f;
             if (birds[i].x > 1450.0f) birds[i].x = -150.0f;
         }
 
-        // [A-108]: Walking Human Locomotion
-        for (int i = 0; i < numHumans; ++i) {
+        // 7. Walking Humans
+        for (int i = 0; i < numHumans; i++) {
             humans[i].x += humans[i].dir * humans[i].speed;
             humans[i].legAngle += 0.08f;
 
-            if (humans[i].x > 1360.0f)     humans[i].dir = -1.0f;
-            else if (humans[i].x < -80.0f) humans[i].dir =  1.0f;
+            if (humans[i].x > 1360.0f) humans[i].dir = -1.0f;
+            if (humans[i].x < -80.0f)  humans[i].dir =  1.0f;
         }
     }
 
@@ -2619,54 +2749,24 @@ void timerScene2(int value) {
     glutTimerFunc(16, timerScene2, 0);
 }
 
-// =========================================================
 // INTERACTION CALLBACKS (MOUSE, RESHAPE, INIT, MAIN)
-// =========================================================
+// ==================================================
 
-// Mouse Interaction Handler: Left click to toggle pause/play[cite: 1]
+// Mouse Interaction Handler
 void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         isPaused = !isPaused;
     }
 }
 
-// Aspect-Ratio Preserving Reshape Callback[cite: 8]
-void reshape(int width, int height) {
-    if (height == 0) height = 1;
-
-    glViewport(0, 0, width, height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    const float baseAspect = 1280.0f / 720.0f;
-    float windowAspect = (float)width / (float)height;
-
-    if (windowAspect >= baseAspect) {
-        float extraWidth = (720.0f * windowAspect - 1280.0f) / 2.0f;
-        gluOrtho2D(-extraWidth, 1280.0f + extraWidth, 0.0, 720.0);
-    } else {
-        float extraHeight = (1280.0f / windowAspect - 720.0f) / 2.0f;
-        gluOrtho2D(0.0, 1280.0, -extraHeight, 720.0f + extraHeight);
-    }
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
-
-// Initialization
 void init2() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    for (int i = 0; i < numStars; ++i) {
-        starX[i] = -300.0f + (float)(rand() % 1900);
-        starY[i] = 340.0f + (float)(rand() % 360);
-    }
-
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0.0, 1280.0, 0.0, 720.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 //===========================================Badhon=================================
@@ -4836,24 +4936,19 @@ void handleKeypress(unsigned char key, int x, int y)
     else if (key == '2') {
         currentScene = 2;
         glutDisplayFunc(displayScene2);
-        glutTimerFunc(16, timerScene2, 0);
     }
     else if (key == '3') {
         currentScene = 3;
         glutDisplayFunc(displayScene3);
-        glutTimerFunc(16, update, 0);
-        glutTimerFunc(16, updateClouds, 0);
     }
     else if (key == '4') {
         currentScene = 4;
         glutDisplayFunc(displayScene4);
-        glutTimerFunc(16, updateScene4, 0);
     }
     else if (key == '5') {
         currentScene = 5;
         glutDisplayFunc(displayScene5);
         glutReshapeFunc(reshapeScene5);
-        glutTimerFunc(TIMER_MS, timerScene5, 0);
     }
     else if (key == 'a' || key == 'A') {
         currentScene--;
@@ -4917,6 +5012,11 @@ int main(int argc, char** argv)
     glutKeyboardFunc(handleKeypress);
     glutMouseFunc(mouse);
     glutTimerFunc(60, timer, 0);
+    glutTimerFunc(16, timerScene2, 0);
+    glutTimerFunc(16, update, 0);
+    glutTimerFunc(16, updateClouds, 0);
+    glutTimerFunc(16, updateScene4, 0);
+    glutTimerFunc(TIMER_MS, timerScene5, 0);
     glutMainLoop();
     return 0;
 }

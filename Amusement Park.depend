@@ -1,23 +1,9 @@
 # depslib dependency file v1.0
-1789418798 source:c:\users\botwithrtx\documents\study\semester 7\computer graphics [x]\graphics project ( final saga )\trying to merge\main.cpp
+1789427387 source:s:\amusement-park-animation-2d-opengl\main.cpp
 	<windows.h>
 	<GL/glut.h>
 	<cmath>
 	<cstdlib>
-
-1632060800 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\glut.h
-	"freeglut_std.h"
-
-1632060797 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\freeglut_std.h
-	<windows.h>
-	<EGL/egl.h>
-	<GLES/gl.h>
-	<GLES2/gl2.h>
-	<OpenGL/gl.h>
-	<OpenGL/glu.h>
-	<GL/gl.h>
-	<GL/glu.h>
-	<stdlib.h>
 
 1526093414 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\windows.h
 	<_mingw.h>
@@ -868,16 +854,24 @@
 1526093414 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\imm.h
 	<_mingw_unicode.h>
 
+1782413106 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\glut.h
+	"freeglut_std.h"
+
+1782413106 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\freeglut_std.h
+	<windows.h>
+	<EGL/egl.h>
+	<GLES/gl.h>
+	<GLES2/gl2.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<stdlib.h>
+
 1526093414 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\gl.h
 	<windows.h>
 	<stddef.h>
 
 1526093414 c:\program files\codeblocks\mingw\x86_64-w64-mingw32\include\gl\glu.h
 	<GL/gl.h>
-
-1789418944 source:c:\users\botwithrtx\documents\study\semester 7\computer graphics [x]\graphics project ( final saga )\git\amusement-park-animation-2d-opengl\main.cpp
-	<windows.h>
-	<GL/glut.h>
-	<cmath>
-	<cstdlib>
 

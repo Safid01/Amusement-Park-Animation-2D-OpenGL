@@ -3189,7 +3189,6 @@ void DRAW_BLUE_SECTION() {
     glEnd();
 }
 
-
 void DRAW_WATER_SECTION() {
     glColor3f(0.4902f, 0.8314f, 0.9412f);
     glBegin(GL_POLYGON);
@@ -3350,7 +3349,7 @@ void init() {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0, 1080.0, 0.0, 720.0);
+    gluOrtho2D(0.0, 1280.0, 0.0, 720.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnable(GL_LINE_SMOOTH);

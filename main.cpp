@@ -4829,6 +4829,8 @@ const int WIN_W = 1280;
  int currentScene =1 ;
 void handleKeypress(unsigned char key, int x, int y)
 {
+    // ================= SCENE SWITCHING =================
+
     if (key == '1') {
         currentScene = 1;
         glutDisplayFunc(displayScene1);
@@ -4836,37 +4838,39 @@ void handleKeypress(unsigned char key, int x, int y)
     else if (key == '2') {
         currentScene = 2;
         glutDisplayFunc(displayScene2);
-        glutTimerFunc(16, timerScene2, 0);
     }
     else if (key == '3') {
         currentScene = 3;
         glutDisplayFunc(displayScene3);
-        glutTimerFunc(16, update, 0);
-        glutTimerFunc(16, updateClouds, 0);
     }
     else if (key == '4') {
         currentScene = 4;
         glutDisplayFunc(displayScene4);
-        glutTimerFunc(16, updateScene4, 0);
     }
     else if (key == '5') {
         currentScene = 5;
         glutDisplayFunc(displayScene5);
         glutReshapeFunc(reshapeScene5);
-        glutTimerFunc(TIMER_MS, timerScene5, 0);
     }
-    else if (key == 'a' || key == 'A') {
+    else if (key == 'a') {
         currentScene--;
-        if (currentScene < 1) currentScene = 5;
-        handleKeypress((unsigned char)('0' + currentScene), x, y);
-        return; // avoid double glutPostRedisplay below
-    }
-    else if (key == 'd' || key == 'D') {
-        currentScene++;
-        if (currentScene > 5) currentScene = 1;
+
+        if (currentScene < 1)
+            currentScene = 5;
+
         handleKeypress((unsigned char)('0' + currentScene), x, y);
         return;
     }
+    else if (key == 'd') {
+        currentScene++;
+
+        if (currentScene > 5)
+            currentScene = 1;
+
+        handleKeypress((unsigned char)('0' + currentScene), x, y);
+        return;
+    }
+
     // ================= SCENE 5 CONTROLS =================
 
     if (currentScene == 5)
@@ -4889,6 +4893,7 @@ void handleKeypress(unsigned char key, int x, int y)
             return;
         }
 
+        // J = move down
         if (key == 'j' || key == 'J')
         {
             carY -= CAR_STEP;
@@ -4899,9 +4904,9 @@ void handleKeypress(unsigned char key, int x, int y)
             glutPostRedisplay();
             return;
         }
-    //=================================
+    }
+
     glutPostRedisplay();
-}
 }
 
 int main(int argc, char** argv)
@@ -4916,7 +4921,12 @@ int main(int argc, char** argv)
     glutDisplayFunc(displayScene1);
     glutKeyboardFunc(handleKeypress);
     glutMouseFunc(mouse);
-    glutTimerFunc(60, timer, 0);
+    glutTimerFunc(60, timer, 0); //SAIF
+    glutTimerFunc(16, update, 0);//RAHAT
+    glutTimerFunc(16, updateClouds, 0);//RAHAT
+    glutTimerFunc(16, timerScene2, 0);//SAFID
+    glutTimerFunc(16, updateScene4, 0);//BADHON
+    glutTimerFunc(TIMER_MS, timerScene5, 0);//RAKA
     glutMainLoop();
     return 0;
 }

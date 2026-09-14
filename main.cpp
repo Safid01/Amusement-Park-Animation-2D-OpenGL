@@ -3785,7 +3785,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowPosition(50, 50);
     glutInitWindowSize(1280, 720);
-    glutCreateWindow("Merged Amusement Park Scenes  (keys 1-4, Left/Right arrows)");
+    glutCreateWindow("Merged Amusement Park Animation");
 
     // Run every scene's own initialization exactly as its original
     // program did (seeds star positions, enables blending, etc.) --

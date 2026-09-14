@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1789420662 source:c:\users\botwithrtx\documents\study\semester 7\computer graphics [x]\graphics project ( final saga )\git\amusement-park-animation-2d-opengl\main.cpp
+1789421812 source:c:\users\botwithrtx\documents\study\semester 7\computer graphics [x]\graphics project ( final saga )\git\amusement-park-animation-2d-opengl\main.cpp
 	<windows.h>
 	<GL/glut.h>
 	<cmath>
